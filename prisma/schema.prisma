@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MailingStatus {
+  DRAFT
+  SCHEDULED
+  QUEUED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum MessageType {
+  TEXT
+  PHOTO
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  BLOCKED
+  FAILED
+}
+
+model Mailing {
+  id          Int          @id @default(autoincrement())
+  title       String?
+  text        String
+  type        MessageType  @default(TEXT)
+  photoUrl    String?
+  buttons     Json         @default("[]")
+  sendAt      DateTime?
+  status      MailingStatus @default(DRAFT)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  startedAt   DateTime?
+  completedAt DateTime?
+  cancelledAt DateTime?
+
+  deliveries Delivery[]
+
+  @@index([status, sendAt])
+  @@index([createdAt])
+}
+
+model Recipient {
+  id         Int        @id @default(autoincrement())
+  telegramId BigInt     @unique
+  username   String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  deliveries Delivery[]
+}
+
+model Delivery {
+  id           Int            @id @default(autoincrement())
+  mailingId    Int
+  recipientId  Int
+  status       DeliveryStatus @default(PENDING)
+  attempts     Int            @default(0)
+  errorMessage String?
+  sentAt       DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  mailing   Mailing   @relation(fields: [mailingId], references: [id], onDelete: Cascade)
+  recipient Recipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@unique([mailingId, recipientId])
+  @@index([mailingId, status])
+}
