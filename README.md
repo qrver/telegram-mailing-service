@@ -162,8 +162,3 @@ npm audit
 ![](files/Pasted%20image%2020260731021349.png)
 
 <img width="1512" height="949" alt="image" src="https://github.com/user-attachments/assets/1bef697d-f928-4841-b4f1-084f1c4758b4" />
-
-
-## Лицензия
-
-Исходный код распространяется по ограничительной лицензии из `LICENSE`. Зависимости и Telegram API регулируются собственными условиями правообладателей.
